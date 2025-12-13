@@ -6,17 +6,10 @@ plugins {
 
 group = 'com.walkingdog'
 version = '0.0.1-SNAPSHOT'
-description = 'walkingdog project for Spring Boot'
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
 	}
 }
 
@@ -25,16 +18,26 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-h2console'
+	// 🌐 Web + Jackson 포함
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// 🗄 JPA
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	compileOnly 'org.projectlombok:lombok'
+
+	// 🧪 DB
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// ✨ Lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// ✅ Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//Jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 }
 
 tasks.named('test') {
