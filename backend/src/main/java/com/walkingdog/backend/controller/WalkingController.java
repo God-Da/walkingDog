@@ -22,10 +22,11 @@ public class WalkingController {
     @GetMapping("/walking/suitability")
     public ResponseEntity<?> getWalkingSuitability(
             @RequestParam double lat,
-            @RequestParam double lon) {
+            @RequestParam double lon,
+            @RequestParam(required = false) String address) {
         try {
-            logger.info("산책 적합도 조회 요청: lat={}, lon={}", lat, lon);
-            WalkingSuitabilityResponse response = walkingSuitabilityService.calculateSuitability(lat, lon);
+            logger.info("산책 적합도 조회 요청: lat={}, lon={}, address={}", lat, lon, address);
+            WalkingSuitabilityResponse response = walkingSuitabilityService.calculateSuitability(lat, lon, address);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("산책 적합도 조회 실패: lat={}, lon={}", lat, lon, e);

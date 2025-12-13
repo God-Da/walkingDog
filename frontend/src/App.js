@@ -11,6 +11,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentLocation, setCurrentLocation] = useState(null);
   const [ps, setPs] = useState(null); // Places 서비스
+  const [geocoder, setGeocoder] = useState(null); // Geocoder 서비스
   const searchInputRef = useRef(null);
 
   // 카카오맵 초기화
@@ -72,6 +73,12 @@ function App() {
     if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
       const placesService = new window.kakao.maps.services.Places();
       setPs(placesService);
+    }
+    
+    // Geocoder 서비스 초기화 (역지오코딩용)
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      const geocoderService = new window.kakao.maps.services.Geocoder();
+      setGeocoder(geocoderService);
     }
 
     // 기본 위치: 서울시청
@@ -195,9 +202,42 @@ function App() {
     setError(null);
     
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/walking/suitability?lat=${lat}&lon=${lng}`
-      );
+      // 카카오맵 역지오코딩으로 정확한 주소 가져오기
+      let address = null;
+      if (geocoder) {
+        address = await new Promise((resolve) => {
+          const callback = (result, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+              // 가장 상세한 주소 사용
+              const addr = result[0].address;
+              const roadAddr = result[0].road_address;
+              
+              // 도로명 주소가 있으면 도로명 주소 사용, 없으면 지번 주소 사용
+              if (roadAddr) {
+                resolve(`${roadAddr.region_1depth_name} ${roadAddr.region_2depth_name} ${roadAddr.region_3depth_name}${roadAddr.road_name ? ' ' + roadAddr.road_name : ''}`);
+              } else if (addr) {
+                resolve(`${addr.region_1depth_name} ${addr.region_2depth_name} ${addr.region_3depth_name}`);
+              } else {
+                resolve(null);
+              }
+            } else {
+              resolve(null);
+            }
+          };
+          
+          geocoder.coord2Address(lng, lat, callback);
+        });
+      }
+      
+      // 주소를 백엔드로 전달
+      const url = new URL('http://localhost:8080/api/walking/suitability');
+      url.searchParams.append('lat', lat);
+      url.searchParams.append('lon', lng);
+      if (address) {
+        url.searchParams.append('address', address);
+      }
+      
+      const response = await fetch(url.toString());
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "서버 오류가 발생했습니다." }));
@@ -392,6 +432,12 @@ function App() {
                     <span className="text-gray-600">위치</span>
                     <span className="font-semibold text-gray-800">{suitability.location}</span>
                   </div>
+                  {suitability.stationName && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">측정소</span>
+                      <span className="font-semibold text-gray-800">{suitability.stationName}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">PM10</span>
                     <span className={`font-semibold ${getStatusTextColor(suitability.status)}`}>

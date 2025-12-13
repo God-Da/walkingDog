@@ -15,7 +15,8 @@ public class WalkingSuitabilityResponse {
     private String temperature;
     private String skyCondition;  // 맑음, 구름많음, 흐림
     private String precipitation;  // 없음, 비, 눈 등
-    private String location;
+    private String location;  // 사용자가 검색하거나 현재 위치 (주소)
+    private String stationName;  // 측정소 이름
     private String message;
 }
 

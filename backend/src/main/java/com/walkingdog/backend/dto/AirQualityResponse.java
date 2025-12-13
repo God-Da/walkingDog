@@ -4,7 +4,8 @@ public class AirQualityResponse {
 
     private int pm10Value;
     private int pm25Value;
-    private String location;
+    private String location;  // 사용자 위치 주소
+    private String stationName;  // 측정소 이름
     private String khaiGrade;
     private String dataTime;
 
@@ -30,6 +31,14 @@ public class AirQualityResponse {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
     }
 
     public String getKhaiGrade() {
