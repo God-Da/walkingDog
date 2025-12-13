@@ -137,3 +137,4 @@ GET /api/walking/suitability?lat={위도}&lon={경도}
 
 이슈 및 개선사항은 언제든 환영합니다!
 
+

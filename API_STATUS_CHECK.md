@@ -70,3 +70,4 @@ http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?service
 
 현재 서비스는 **정상 작동 중**입니다. API가 실패해도 Mock 데이터로 자동 전환되어 사용자는 문제없이 서비스를 사용할 수 있습니다. 실제 API 연동은 공공데이터포탈에서 API 신청 상태가 "승인완료"가 되면 자동으로 작동합니다.
 
+

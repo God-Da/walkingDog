@@ -43,3 +43,4 @@ public.data.api.key=여기에_API_키_입력
 - HTTP 사용 (https가 아닌 http)
 - API 신청 상태가 "승인완료"인지 확인 필수
 
+

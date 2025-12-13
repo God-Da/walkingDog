@@ -95,3 +95,4 @@ http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnst
 
 **가장 중요한 것은 API 신청 상태가 "승인완료"인지 확인하는 것입니다!**
 
+
