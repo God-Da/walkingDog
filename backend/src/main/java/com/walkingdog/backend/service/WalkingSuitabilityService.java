@@ -15,9 +15,13 @@ public class WalkingSuitabilityService {
     private WeatherService weatherService;
 
     public WalkingSuitabilityResponse calculateSuitability(double lat, double lon) {
+        return calculateSuitability(lat, lon, null);
+    }
+
+    public WalkingSuitabilityResponse calculateSuitability(double lat, double lon, String address) {
 
         AirQualityResponse airQuality =
-                airQualityService.getAirQualityByLocation(lat, lon);
+                airQualityService.getAirQualityByLocation(lat, lon, address);
 
         WeatherService.WeatherInfo weather =
                 weatherService.getWeather(lat, lon);
@@ -31,6 +35,7 @@ public class WalkingSuitabilityService {
         response.setPm10Value(pm10);
         response.setPm25Value(pm25);
         response.setLocation(airQuality.getLocation());
+        response.setStationName(airQuality.getStationName());
         response.setTemperature(weather.temperature);
         response.setSkyCondition(weather.skyCondition);
         response.setPrecipitation(weather.precipitation);
