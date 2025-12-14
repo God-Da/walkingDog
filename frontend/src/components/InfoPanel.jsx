@@ -8,9 +8,11 @@ import {
     AIR_QUALITY_STANDARDS,
     STATUS_EMOJIS,
 } from "../constants/statusConstants";
+import FavoriteButton from "./FavoriteButton";
+import ReviewSection from "./ReviewSection";
 
 const InfoPanel = () => {
-    const { showInfoPanel, setShowInfoPanel, loading, error, suitability } =
+    const { showInfoPanel, setShowInfoPanel, loading, error, suitability, selectedLocation } =
         useMap();
 
     if (!showInfoPanel) return null;
@@ -146,6 +148,24 @@ const InfoPanel = () => {
                                 )}
                             </ul>
                         </div>
+
+                        {/* 찜 버튼 */}
+                        {selectedLocation && (
+                            <FavoriteButton
+                                latitude={selectedLocation.lat}
+                                longitude={selectedLocation.lng}
+                                location={suitability.location}
+                            />
+                        )}
+
+                        {/* 리뷰 섹션 */}
+                        {selectedLocation && (
+                            <ReviewSection
+                                latitude={selectedLocation.lat}
+                                longitude={selectedLocation.lng}
+                                location={suitability.location}
+                            />
+                        )}
                     </div>
                 )}
 

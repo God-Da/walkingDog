@@ -3,12 +3,13 @@ import { useMap } from "../context/MapContext";
 import { fetchSuitability } from "../services/suitabilityService";
 
 export const useSuitability = () => {
-  const { setSuitability, setLoading, setError, setShowInfoPanel, geocoder } = useMap();
+  const { setSuitability, setLoading, setError, setShowInfoPanel, setSelectedLocation, geocoder } = useMap();
 
   const getSuitability = async (lat, lng) => {
     setLoading(true);
     setError(null);
     setShowInfoPanel(true);
+    setSelectedLocation({ lat, lng }); // 선택된 위치 저장
 
     try {
       const data = await fetchSuitability(lat, lng, geocoder);

@@ -10,6 +10,7 @@ export const MapProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null); // 선택된 위치의 위도/경도
   const [ps, setPs] = useState(null); // Places 서비스
   const [geocoder, setGeocoder] = useState(null); // Geocoder 서비스
 
@@ -30,6 +31,8 @@ export const MapProvider = ({ children }) => {
         setShowInfoPanel,
         currentLocation,
         setCurrentLocation,
+        selectedLocation,
+        setSelectedLocation,
         ps,
         setPs,
         geocoder,

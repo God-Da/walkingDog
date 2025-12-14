@@ -1,9 +1,11 @@
 import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { KAKAO_MAP_SCRIPT_URL, DEFAULT_POSITION } from "../constants/mapConstants";
 import { useMap } from "../context/MapContext";
 import { useSuitability } from "./useSuitability";
 
 export const useKakaoMap = () => {
+  const [searchParams] = useSearchParams();
   const {
     map,
     setMap,
@@ -105,6 +107,23 @@ export const useKakaoMap = () => {
     });
     newMarker.setMap(kakaoMap);
     setMarker(newMarker);
+
+    // URL 파라미터에서 위도/경도 확인
+    const urlLat = searchParams.get("lat");
+    const urlLng = searchParams.get("lng");
+    
+    let initialPosition = defaultPosition;
+    if (urlLat && urlLng) {
+      const lat = parseFloat(urlLat);
+      const lng = parseFloat(urlLng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        initialPosition = new window.kakao.maps.LatLng(lat, lng);
+        kakaoMap.setCenter(initialPosition);
+        newMarker.setPosition(initialPosition);
+        getSuitability(lat, lng);
+        return; // URL 파라미터가 있으면 여기서 종료
+      }
+    }
 
     // 지도 클릭 이벤트
     window.kakao.maps.event.addListener(kakaoMap, "click", (mouseEvent) => {
