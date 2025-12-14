@@ -12,17 +12,37 @@ export const getAddressFromCoordinates = async (geocoder, lng, lat) => {
         const addr = result[0].address;
         const roadAddr = result[0].road_address;
 
-        // 도로명 주소가 있으면 도로명 주소 사용, 없으면 지번 주소 사용
+        // 도로명 주소가 있으면 도로명 주소 사용 (상세 주소 포함)
         if (roadAddr) {
-          resolve(
-            `${roadAddr.region_1depth_name} ${roadAddr.region_2depth_name} ${roadAddr.region_3depth_name}${
-              roadAddr.road_name ? " " + roadAddr.road_name : ""
-            }`
-          );
+          let address = `${roadAddr.region_1depth_name}${roadAddr.region_2depth_name}`;
+          
+          // 도로명 추가
+          if (roadAddr.road_name) {
+            address += roadAddr.road_name;
+          }
+          
+          // 건물번호 추가 (건물본번-건물부번 형식)
+          if (roadAddr.main_building_no) {
+            address += ` ${roadAddr.main_building_no}`;
+            if (roadAddr.sub_building_no && roadAddr.sub_building_no !== "0") {
+              address += `-${roadAddr.sub_building_no}`;
+            }
+          }
+          
+          resolve(address);
         } else if (addr) {
-          resolve(
-            `${addr.region_1depth_name} ${addr.region_2depth_name} ${addr.region_3depth_name}`
-          );
+          // 지번 주소 사용
+          let address = `${addr.region_1depth_name}${addr.region_2depth_name}${addr.region_3depth_name}`;
+          
+          // 지번 추가
+          if (addr.main_address_no) {
+            address += ` ${addr.main_address_no}`;
+            if (addr.sub_address_no && addr.sub_address_no !== "0") {
+              address += `-${addr.sub_address_no}`;
+            }
+          }
+          
+          resolve(address);
         } else {
           resolve(null);
         }

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { favoriteService } from "../services/favoriteService";
 import { reviewService } from "../services/reviewService";
 import { userService } from "../services/userService";
+import { getAddressFromCoordinates } from "../services/suitabilityService";
 
 const MyPage = () => {
     const [user, setUser] = useState(null);
@@ -60,11 +61,64 @@ const MyPage = () => {
         }
     };
 
+    // 카카오맵 스크립트 로드 대기
+    const waitForKakaoMap = () => {
+        return new Promise((resolve) => {
+            if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+                resolve();
+            } else {
+                const checkInterval = setInterval(() => {
+                    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }
+                }, 100);
+                // 최대 5초 대기
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve();
+                }, 5000);
+            }
+        });
+    };
+
     const loadFavorites = async () => {
         try {
             const result = await favoriteService.getMyFavorites();
             if (result.success) {
-                setFavorites(result.favorites || []);
+                const favoritesList = result.favorites || [];
+                
+                // 카카오맵 스크립트 로드 대기
+                await waitForKakaoMap();
+                
+                // 각 찜 항목의 좌표를 역지오코딩하여 상세 주소 가져오기
+                const favoritesWithAddresses = await Promise.all(
+                    favoritesList.map(async (favorite) => {
+                        // 좌표 형식인지 확인 (괄호와 숫자 패턴이 있는 경우)
+                        const isCoordinateFormat = favorite.location && 
+                            /\([\d.]+,\s*[\d.]+\)/.test(favorite.location);
+                        
+                        if (!isCoordinateFormat) {
+                            return favorite; // 이미 상세 주소인 경우 그대로 반환
+                        }
+                        
+                        // geocoder 생성
+                        if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+                            const geocoder = new window.kakao.maps.services.Geocoder();
+                            const address = await getAddressFromCoordinates(
+                                geocoder,
+                                favorite.longitude,
+                                favorite.latitude
+                            );
+                            return {
+                                ...favorite,
+                                location: address || favorite.location, // 주소를 가져오지 못한 경우 기존 값 유지
+                            };
+                        }
+                        return favorite;
+                    })
+                );
+                setFavorites(favoritesWithAddresses);
             }
         } catch (err) {
             console.error("찜 목록 로드 오류:", err);
@@ -75,7 +129,39 @@ const MyPage = () => {
         try {
             const result = await reviewService.getMyReviews();
             if (result.success) {
-                setReviews(result.reviews || []);
+                const reviewsList = result.reviews || [];
+                
+                // 카카오맵 스크립트 로드 대기
+                await waitForKakaoMap();
+                
+                // 각 리뷰 항목의 좌표를 역지오코딩하여 상세 주소 가져오기
+                const reviewsWithAddresses = await Promise.all(
+                    reviewsList.map(async (review) => {
+                        // 좌표 형식인지 확인 (괄호와 숫자 패턴이 있는 경우)
+                        const isCoordinateFormat = review.location && 
+                            /\([\d.]+,\s*[\d.]+\)/.test(review.location);
+                        
+                        if (!isCoordinateFormat) {
+                            return review; // 이미 상세 주소인 경우 그대로 반환
+                        }
+                        
+                        // geocoder 생성
+                        if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+                            const geocoder = new window.kakao.maps.services.Geocoder();
+                            const address = await getAddressFromCoordinates(
+                                geocoder,
+                                review.longitude,
+                                review.latitude
+                            );
+                            return {
+                                ...review,
+                                location: address || review.location, // 주소를 가져오지 못한 경우 기존 값 유지
+                            };
+                        }
+                        return review;
+                    })
+                );
+                setReviews(reviewsWithAddresses);
             }
         } catch (err) {
             console.error("리뷰 목록 로드 오류:", err);

@@ -82,8 +82,9 @@ export const useKakaoMap = () => {
     }
 
     // Geocoder 서비스 초기화 (역지오코딩용)
+    let geocoderService = null;
     if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-      const geocoderService = new window.kakao.maps.services.Geocoder();
+      geocoderService = new window.kakao.maps.services.Geocoder();
       setGeocoder(geocoderService);
     }
 
@@ -120,16 +121,18 @@ export const useKakaoMap = () => {
         initialPosition = new window.kakao.maps.LatLng(lat, lng);
         kakaoMap.setCenter(initialPosition);
         newMarker.setPosition(initialPosition);
-        getSuitability(lat, lng);
+        // geocoder를 직접 전달하여 주소 변환 보장
+        getSuitability(lat, lng, geocoderService);
         return; // URL 파라미터가 있으면 여기서 종료
       }
     }
 
-    // 지도 클릭 이벤트
+    // 지도 클릭 이벤트 - geocoder를 직접 전달하여 주소 변환 보장
     window.kakao.maps.event.addListener(kakaoMap, "click", (mouseEvent) => {
       const latlng = mouseEvent.latLng;
       newMarker.setPosition(latlng);
-      getSuitability(latlng.getLat(), latlng.getLng());
+      // geocoder를 직접 전달하여 지도 클릭 시에도 상세 주소가 표시되도록 함
+      getSuitability(latlng.getLat(), latlng.getLng(), geocoderService);
     });
 
     // 현재 위치 가져오기
@@ -143,20 +146,25 @@ export const useKakaoMap = () => {
           setCurrentLocation({ lat, lng });
           kakaoMap.setCenter(currentPos);
           newMarker.setPosition(currentPos);
-          getSuitability(lat, lng);
+          // geocoder를 직접 전달하여 주소 변환 보장
+          getSuitability(lat, lng, geocoderService);
         },
         (err) => {
           console.error("위치 정보를 가져올 수 없습니다:", err);
+          // geocoder를 직접 전달하여 주소 변환 보장
           getSuitability(
             defaultPosition.getLat(),
-            defaultPosition.getLng()
+            defaultPosition.getLng(),
+            geocoderService
           );
         }
       );
     } else {
+      // geocoder를 직접 전달하여 주소 변환 보장
       getSuitability(
         defaultPosition.getLat(),
-        defaultPosition.getLng()
+        defaultPosition.getLng(),
+        geocoderService
       );
     }
   };
