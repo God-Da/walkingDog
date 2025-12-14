@@ -57,3 +57,4 @@ public class AirQualityResponse {
         this.dataTime = dataTime;
     }
 }
+
